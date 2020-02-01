@@ -11,22 +11,28 @@ import android.os.IBinder;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class ListDevices extends AppCompatActivity {
     LocalService mService;
     boolean mBound = false;
-    public List<String> listDevices = new ArrayList<>();
+    private List<String> listDevices = new ArrayList<>();
+    private String typeDevice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_devices);
+
+        listDevices = getIntent().getStringArrayListExtra("list");
+        typeDevice = getIntent().getStringExtra("typeDevice");
     }
 
     @Override
@@ -34,12 +40,7 @@ public class ListDevices extends AppCompatActivity {
         super.onStart();
         Intent intent = new Intent(this, LocalService.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-        listDevices = mService.getListDevices();
-    }
 
-    @Override
-    public void onResume() {
-        super.onResume();
         ListView listView = findViewById(R.id.listDevices);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1, listDevices);
@@ -48,9 +49,18 @@ public class ListDevices extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 TextView textView = (TextView) view;
-                Toast.makeText(getBaseContext(), textView.getText().toString(), Toast.LENGTH_SHORT).show();
+                mService.sendString(textView.getText().toString());
+                ceateTerminal(typeDevice);
             }
         });
+    }
+
+    private void ceateTerminal(String typeDevice) {
+        switch (typeDevice) {
+            case "LED" :
+                Intent intent = new Intent(ListDevices.this, LedTerminal.class);
+                startActivity(intent);
+        }
     }
 
     @Override

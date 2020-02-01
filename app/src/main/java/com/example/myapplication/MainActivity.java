@@ -13,10 +13,12 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class MainActivity extends AppCompatActivity {
     LocalService mService;
     boolean mBound = false;
+    private ArrayList<String> listDevices = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,9 +44,16 @@ public class MainActivity extends AppCompatActivity {
 
     public void onButtonClickLed(View v) {
         if (mBound) {
-            mService.sendType('L');
+            try {
+                mService.sendString("LED");
+                listDevices = mService.getListDevices();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         Intent intent = new Intent(MainActivity.this, ListDevices.class);
+        intent.putStringArrayListExtra("list", listDevices);
+        intent.putExtra("typeDevice", "LED");
         startActivity(intent);
     }
 

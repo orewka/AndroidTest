@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -15,6 +16,7 @@ import java.lang.reflect.Type;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class LocalService extends Service {
     private final IBinder mBinder = new LocalBinder();
@@ -32,8 +34,6 @@ public class LocalService extends Service {
                     socket = new Socket("10.0.2.2", 56);
                     dataOutputStream = new DataOutputStream(socket.getOutputStream());
                     dataInputStream = new DataInputStream(socket.getInputStream());
-                    dataOutputStream.writeChar('a');
-                    dataOutputStream.flush();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -53,12 +53,12 @@ public class LocalService extends Service {
         return mBinder;
     }
 
-    public void sendType(final Character character) {
+    public void sendString(final String string) {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    dataOutputStream.writeChar(character);
+                    dataOutputStream.write(string.getBytes());
                     dataOutputStream.flush();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -68,12 +68,42 @@ public class LocalService extends Service {
         thread.start();
     }
 
-    public List<String> getListDevices() {
-        StringReader stringReader = new StringReader();
-        Type type = new TypeToken<List<String>>() {}.getType();
-        List<String> listDevices = new ArrayList<>();
-        String listDevicesJson = stringReader.readCommand(dataInputStream);
-        listDevices = new Gson().fromJson(listDevicesJson, type);
-        return listDevices;
+    public void sendData(final LinkedBlockingQueue<Integer> linkedBlockingQueue) {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (!Thread.currentThread().isInterrupted()) {
+                    try {
+                        dataOutputStream.writeInt(linkedBlockingQueue.take());
+                        dataOutputStream.flush();
+                    } catch (IOException | InterruptedException e) {
+                        Toast.makeText(getApplicationContext(), "Device disconnected", Toast.LENGTH_SHORT).show();
+                        Thread.currentThread().interrupt();
+                    }
+                }
+            }
+        });
+        thread.start();
+    }
+
+    public ArrayList<String> getListDevices() throws InterruptedException {
+        final LinkedBlockingQueue<ArrayList> listLinkedBlockingQueue = new LinkedBlockingQueue<>();
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ArrayList<String> arrayList = new ArrayList<>();
+                StringReader stringReader = new StringReader();
+                Type type = new TypeToken<ArrayList<String>>() {}.getType();
+                String listDevicesJson = stringReader.readCommand(dataInputStream);
+                arrayList = new Gson().fromJson(listDevicesJson, type);
+                try {
+                    listLinkedBlockingQueue.put(arrayList);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        thread.start();
+        return listLinkedBlockingQueue.take();
     }
 }
