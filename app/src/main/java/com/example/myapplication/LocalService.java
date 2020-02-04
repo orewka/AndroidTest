@@ -68,22 +68,8 @@ public class LocalService extends Service {
         thread.start();
     }
 
-    public void sendData(final LinkedBlockingQueue<Integer> linkedBlockingQueue) {
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (!Thread.currentThread().isInterrupted()) {
-                    try {
-                        dataOutputStream.writeInt(linkedBlockingQueue.take());
-                        dataOutputStream.flush();
-                    } catch (IOException | InterruptedException e) {
-                        Toast.makeText(getApplicationContext(), "Device disconnected", Toast.LENGTH_SHORT).show();
-                        Thread.currentThread().interrupt();
-                    }
-                }
-            }
-        });
-        thread.start();
+    public void sendData() {
+        System.out.println("ssssssssssss");
     }
 
     public ArrayList<String> getListDevices() throws InterruptedException {

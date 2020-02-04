@@ -50,12 +50,13 @@ public class ListDevices extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 TextView textView = (TextView) view;
                 mService.sendString(textView.getText().toString());
-                ceateTerminal(typeDevice);
+                mService.sendData();
+                createTerminal(typeDevice);
             }
         });
     }
 
-    private void ceateTerminal(String typeDevice) {
+    protected void createTerminal(String typeDevice) {
         switch (typeDevice) {
             case "LED" :
                 Intent intent = new Intent(ListDevices.this, LedTerminal.class);

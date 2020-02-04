@@ -16,12 +16,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class LedTerminal extends AppCompatActivity {
     LocalService mService;
     boolean mBound = false;
-    final LinkedBlockingQueue<Integer> linkedBlockingQeque = new LinkedBlockingQueue<>();
+    LinkedBlockingQueue<Integer> linkedBlockingQueue = new LinkedBlockingQueue<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_led_terminal);
 
     }
 
@@ -51,66 +51,67 @@ public class LedTerminal extends AppCompatActivity {
             textViewBlue.setText("BLUE : ");
             textViewB.setText(String.valueOf(seekBarB.getProgress()));
 
-            mService.sendData(linkedBlockingQeque);
+        if (mBound) {
+            mService.sendData();
+        }
 
-
-            seekBarR.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                    try {
-                        linkedBlockingQeque.put(i + 1000);
-                        textViewR.setText(String.valueOf(i));
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                seekBarR.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                        try {
+                                linkedBlockingQueue.put(i + 1000);
+                                textViewR.setText(String.valueOf(i));
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
-                }
 
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-                }
-
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-                }
-            });
-            seekBarG.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                    try {
-                        linkedBlockingQeque.put(i + 2000);
-                        textViewG.setText(String.valueOf(i));
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
                     }
-                }
 
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-                }
-
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-                }
-            });
-            seekBarB.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                    try {
-                        linkedBlockingQeque.put(i + 3000);
-                        textViewB.setText(String.valueOf(i));
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
                     }
-                }
+                });
+                seekBarG.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                        try {
+                            linkedBlockingQueue.put(i + 2000);
+                            textViewG.setText(String.valueOf(i));
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
 
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-                }
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                    }
 
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-                }
-            });
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                    }
+                });
+                seekBarB.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                        try {
+                            linkedBlockingQueue.put(i + 3000);
+                            textViewB.setText(String.valueOf(i));
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                    }
+                });
     }
 
     @Override
